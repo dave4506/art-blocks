@@ -1,4 +1,4 @@
-import canvasSketch from 'canvas-sketch';
+import * as canvasSketch from 'canvas-sketch';
 import { DIMENSIONS, sketch } from './sketch';
 
 (async () => {

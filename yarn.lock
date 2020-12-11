@@ -237,6 +237,19 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-13.13.35.tgz#d417b48313d691f5c8ff9c52cbc19cdecd306b5e"
   integrity sha512-q9aeOGwv+RRou/ca4aJVUM/jD5u7LBexu+rq9PkA/NhHNn8JifcMo94soKm0b6JGSfw/PSNdqtc428OscMvEYA==
 
+"@types/prop-types@*":
+  version "15.7.3"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
+  integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
+
+"@types/react@^17.0.0":
+  version "17.0.0"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.0.tgz#5af3eb7fad2807092f0046a1302b7823e27919b8"
+  integrity sha512-aj/L7RIMsRlWML3YB6KZiXB3fV2t41+5RBGYF8z+tAKU43Px8C3cYUZsDvf1/+Bm4FK21QWBrDutu8ZJ/70qOw==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^3.0.2"
+
 "@types/seedrandom@^2.4.28":
   version "2.4.28"
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
@@ -495,6 +508,14 @@ bl@^1.0.0:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/bl/-/bl-1.2.3.tgz#1e8dd80142eac80d7158c9dccc047fb620e035e7"
   integrity sha512-pvcNpa0UU69UT341rO6AYy4FVAIkUHuZXRIWbq+zHnsVcRzDDjIAhGuuYoi0d//cwIwtt4pkpKycWEfjdV+vww==
+  dependencies:
+    readable-stream "^2.3.5"
+    safe-buffer "^5.1.1"
+
+bl@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/bl/-/bl-2.2.1.tgz#8c11a7b730655c5d56898cdc871224f40fd901d5"
+  integrity sha512-6Pesp1w0DEX1N550i/uGV/TqucVL4AM/pgThFSN/Qq9si1/DF9aIHs1BxD8V/QU0HoeHO6cQRTAuYnLPKq1e4g==
   dependencies:
     readable-stream "^2.3.5"
     safe-buffer "^5.1.1"
@@ -1207,6 +1228,11 @@ crypto-random-string@^1.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-1.0.0.tgz#a230f64f568310e1498009940790ec99545bca7e"
   integrity sha1-ojD2T1aDEOFJgAmUB5DsmVRbyn4=
 
+csstype@^3.0.2:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.5.tgz#7fdec6a28a67ae18647c51668a9ff95bb2fa7bb8"
+  integrity sha512-uVDi8LpBUKQj6sdxNaTetL6FpeCqTjOvAQuQUa/qAqq8oOd4ivkbhgnqayl0dnPal8Tb/yB1tF+gOvCBiicaiQ==
+
 dargs@^4.0.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/dargs/-/dargs-4.1.0.tgz#03a9dbb4b5c2f139bf14ae53f0b8a2a6a86f4e17"
@@ -1865,6 +1891,16 @@ glsl-inject-defines@^1.0.1:
     glsl-token-string "^1.0.1"
     glsl-tokenizer "^2.0.2"
 
+glsl-noise@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/glsl-noise/-/glsl-noise-0.0.0.tgz#367745f3a33382c0eeec4cb54b7e99cfc1d7670b"
+  integrity sha1-NndF86MzgsDu7Ey1S36Zz8HXZws=
+
+glsl-random@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/glsl-random/-/glsl-random-0.0.5.tgz#bd00c8c1ab1f5587e5fe2d48e83c50c5b9798b5b"
+  integrity sha1-vQDIwasfVYfl/i1I6DxQxbl5i1s=
+
 glsl-resolve@0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/glsl-resolve/-/glsl-resolve-0.0.1.tgz#894bef73910d792c81b5143180035d0a78af76d3"
@@ -1872,6 +1908,11 @@ glsl-resolve@0.0.1:
   dependencies:
     resolve "^0.6.1"
     xtend "^2.1.2"
+
+glsl-rotate@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/glsl-rotate/-/glsl-rotate-1.1.0.tgz#615ec37340f9f4e3ef0725f8a204a1a6a83b9dd8"
+  integrity sha512-Le3yzQU0TsZTYvVTeEIMtGIU8iTAG3hogOUwww8ajDLODfT02LQXFpfUlphZB2nT1/P/saaMHLB30aT7xBuExQ==
 
 glsl-token-assignments@^2.0.0:
   version "2.0.2"
@@ -1981,6 +2022,27 @@ glslify@^6.3.0:
     stack-trace "0.0.9"
     static-eval "^2.0.0"
     tape "^4.6.0"
+    through2 "^2.0.1"
+    xtend "^4.0.0"
+
+glslify@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/glslify/-/glslify-7.1.1.tgz#454d9172b410cb49864029c86d5613947fefd30b"
+  integrity sha512-bud98CJ6kGZcP9Yxcsi7Iz647wuDz3oN+IZsjCRi5X1PI7t/xPKeL0mOwXJjo+CRZMqvq0CkSJiywCcY7kVYog==
+  dependencies:
+    bl "^2.2.1"
+    concat-stream "^1.5.2"
+    duplexify "^3.4.5"
+    falafel "^2.1.0"
+    from2 "^2.3.0"
+    glsl-resolve "0.0.1"
+    glsl-token-whitespace-trim "^1.0.0"
+    glslify-bundle "^5.0.0"
+    glslify-deps "^1.2.5"
+    minimist "^1.2.5"
+    resolve "^1.1.5"
+    stack-trace "0.0.9"
+    static-eval "^2.0.5"
     through2 "^2.0.1"
     xtend "^4.0.0"
 
@@ -3880,7 +3942,7 @@ stacked@^1.1.1:
   resolved "https://registry.yarnpkg.com/stacked/-/stacked-1.1.1.tgz#2c7fa38cc7e37a3411a77cd8e792de448f9f6975"
   integrity sha1-LH+jjMfjejQRp3zY55LeRI+faXU=
 
-static-eval@^2.0.0:
+static-eval@^2.0.0, static-eval@^2.0.5:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/static-eval/-/static-eval-2.1.0.tgz#a16dbe54522d7fa5ef1389129d813fd47b148014"
   integrity sha512-agtxZ/kWSsCkI5E4QifRwsaPs0P0JmZV6dkLz6ILYfFYQGn+5plctanRN+IC8dJRiFkyXHrwEE3W9Wmx67uDbw==

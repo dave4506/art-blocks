@@ -9,10 +9,10 @@ import {
   Range,
   Animation,
 } from '../types';
-import createRegl from 'regl';
-import glslify from 'glslify';
-import seedrandom from 'seedrandom';
-import SimplexNoise from 'simplex-noise';
+import * as createRegl from 'regl';
+import * as glslify from 'glslify';
+import * as seedrandom from 'seedrandom';
+import * as SimplexNoise from 'simplex-noise';
 
 import { convertHexToColor } from '../utils/color';
 import { randomRangeFactory } from '../utils/random';
@@ -88,7 +88,7 @@ export interface Gene {
 const DEFAULT_GENE: Gene = {
   seed: '0xdf943cd665a62371192d37cde3ce31b2da26f3818044285714f982b19df018f0',
   animation: {
-    startDelayInTicks: 0,
+    startDelayInTicks: 1000,
     endDelayInTicks: 0,
     breathDurationInTicksPerUnit: 80,
     bloomMaxStartDelayInTicks: 300,
@@ -796,37 +796,12 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
       });
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      // sketch context is scaled to fit the screen, so the resolution to export can be not the same as viewport dimensions
-      const { offsetX, offsetY } = e;
-      mouseCords = [
-        Math.round((offsetX / sketchContext.styleWidth) * sketchContext.width),
-        Math.round(
-          (offsetY / sketchContext.styleHeight) * sketchContext.height,
-        ),
-      ];
-    };
-
-    const handleMouseEnter = (e: MouseEvent) => {
-      isMouseInCanvas = true;
-    };
-
-    const handleMouseLeave = (e: MouseEvent) => {
-      isMouseInCanvas = false;
-    };
-
-    // connect listeners
-    // sketchContext.canvas.addEventListener('mousemove', handleMouseMove);
-    // sketchContext.canvas.addEventListener('mouseenter', handleMouseEnter);
-    // sketchContext.canvas.addEventListener('mouseleave', handleMouseLeave);
-
     return {
       render: () => {
         start();
         animate();
       },
       end: () => {
-        sketchContext.canvas.removeEventListener('mousemove', handleMouseMove);
       },
     };
   };
