@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "watch": "tsc -w -p tsconfig.json",
-    "build:sketch": "canvas-sketch ./lib/src/gridways/runner.js --name gridways --build --inline",
+    "build:sketch": "canvas-sketch ./lib/src/gridways/runner.js --name index --build --inline",
     "dev:sketch": "canvas-sketch ./lib/src/gridways/runner.js --hot --open",
     "dev": "concurrently \"yarn dev:sketch\" \"tsc -w -p tsconfig.json\"",
     "prettier": "prettier --write \"**/*.{ts,tsx,js,json,css,yml,md}\""
