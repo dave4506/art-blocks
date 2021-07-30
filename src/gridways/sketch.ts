@@ -17,10 +17,11 @@ import * as SimplexNoise from 'simplex-noise';
 import { convertHexToColor } from '../utils/color';
 import { randomRangeFactory } from '../utils/random';
 import { newArray } from '../utils';
+import * as colors from '../data/colors.json';
 
 import { flatten } from 'lodash';
 import { rectToTriangles } from '../utils/primitives';
-import { darken, toColorString } from 'polished';
+import { darken, lighten, saturate, toColorString } from 'polished';
 import { easeInOutElastic, easeOutElastic } from '../utils/easing';
 
 export const PPI = 300;
@@ -47,20 +48,13 @@ interface Options {}
 //Gene type all visual elements are in pixels unless specified
 export interface Gene {
   seed: string;
-  animation: {
-    // animation related properties
-    endDelayInTicks: number; // after the end of the animation, number of ticks to hold at the last frame before restarting
-    startDelayInTicks: number; //before the animation, number of ticks to hold at first frame before starting
-    breathDurationInTicksPerUnit: number; // the amount of ticks to animate for each unit in the grid
-    bloomMaxStartDelayInTicks: number; // the max amount of ticks that the rects can start animation, bloom refers to the effect of some rects starting after others
-  };
-  parallax: {
-    // parallax effect related properties
-    offsetStrength: Cord; // strength of how much x,y offset of the grid due to offset
-    depthStrength: number; // strength of z offset of the grid due to offset
-    rotationStrength: number; // strength of rotational transformation to rects due to offset
-    animationTickCount: number; // animation tick count to return to resting offset state
-  };
+  // animation: {
+  //   // animation related properties
+  //   endDelayInTicks: number; // after the end of the animation, number of ticks to hold at the last frame before restarting
+  //   startDelayInTicks: number; //before the animation, number of ticks to hold at first frame before starting
+  //   breathDurationInTicksPerUnit: number; // the amount of ticks to animate for each unit in the grid
+  //   bloomMaxStartDelayInTicks: number; // the max amount of ticks that the rects can start animation, bloom refers to the effect of some rects starting after others
+  // };
   foreground: {
     // foreground rect related preperties
     pointilism: number; // simplex coefficient for the tinting effect on rects
@@ -86,21 +80,15 @@ export interface Gene {
 }
 
 const DEFAULT_GENE: Gene = {
-  seed: '0xdf943cd665a62371192d37cde3ce31b2da26f3818044285714f982b19df018f0',
-  animation: {
-    startDelayInTicks: 1000,
-    endDelayInTicks: 0,
-    breathDurationInTicksPerUnit: 80,
-    bloomMaxStartDelayInTicks: 300,
-  },
-  parallax: {
-    offsetStrength: [0.02, 0.02],
-    depthStrength: 0.5,
-    rotationStrength: 0.005,
-    animationTickCount: 10,
-  },
+  seed: '2',
+  // animation: {
+  //   startDelayInTicks: 1000,
+  //   endDelayInTicks: 0,
+  //   breathDurationInTicksPerUnit: 80,
+  //   bloomMaxStartDelayInTicks: 300,
+  // },
   foreground: {
-    pointilism: 0.6,
+    pointilism: 0.4,
     colorPalletes: [
       {
         colors: ['#056676', '#5eaaa8', '#a3d2ca'],
@@ -126,16 +114,10 @@ const DEFAULT_GENE: Gene = {
         colorRatios: [0.33, 0.33, 0.34],
         type: 'simple',
       } as SimpleColorPallete,
-      {
-        colors: ['#fecd1a', '#fd3a69'],
-        tintColors: ['#120078'],
-        pointilism: 0.001,
-        type: 'gradient',
-      } as GradientColorPallete,
     ],
     colorPalletesRatio: [0.25, 0.25, 0.25, 0.25],
-    colorSprinkleRatio: 0.01,
-    colorPalletesSprinkleRatio: [0, 0, 0, 0, 1],
+    colorSprinkleRatio: 0.0,
+    colorPalletesSprinkleRatio: [0, 0, 0, 0],
     colorPointilism: 0.01,
   },
   background: {
@@ -149,32 +131,77 @@ const DEFAULT_GENE: Gene = {
   gridPartitioning: {
     gap: 50,
     unitSize: [50, 50],
-    gridSizeInUnits: [20, 30],
+    gridSizeInUnits: [30, 30],
   },
 };
 
-export const sketch = async (gene: Gene = DEFAULT_GENE) => {
-  const rand = seedrandom(gene.seed);
-  const simplex = new SimplexNoise(gene.seed);
+export const generateGene = (seed: string): Gene => {
+  const randSrc = seedrandom(seed);
   const {
     randomByWeights,
     random,
     randomInArrayByWeights,
-  } = randomRangeFactory(rand);
+    randomInArray
+  } = randomRangeFactory(randSrc);
+  const pallete = randomInArray(colors);
+  console.log(pallete);
+  return {
+    seed, 
+    foreground: {
+      pointilism: 0.4,
+      colorPalletes: pallete.map((p: string) => ({
+        colors: [p, lighten(0.2)(p), darken(0.2)(p)],
+        tintColors: [saturate(0.8)(p), saturate(0.8)(p), saturate(0.8)(p)],
+        colorRatios: [0.33, 0.33, 0.34],
+        type: 'simple',
+      } as SimpleColorPallete)),
+      colorPalletesRatio: [0.25, 0.25, 0.25, 0.25],
+      colorSprinkleRatio: 0.0,
+      colorPalletesSprinkleRatio: [0, 0, 0, 0],
+      colorPointilism: 0.01,
+    },
+    background: {
+      colors: [pallete[3], darken(0.4)(pallete[3])],
+      tintColor: saturate(0.4)(pallete[3]),
+      pointilism: 0.08,
+    },
+    gridLinesToRects: {
+      gitter: [0, 0],
+    },
+    gridPartitioning: {
+      gap: 50,
+      unitSize: [50, 50],
+      gridSizeInUnits: [30, 30],
+    },
+  }
+}
+
+export const sketch = async () => {
   return (sketchContext: SketchContext, options: Options) => {
+    let seed = window.location.href ?? '2';
+
+    const randFactory = randomRangeFactory(Math.random);
+
+    const gene = generateGene(seed);
+
+    console.log(gene);
     console.log(sketchContext);
+    const rand = seedrandom(gene.seed);
+    const simplex = new SimplexNoise(gene.seed);
+    const {
+      randomByWeights,
+      random,
+      randomInArrayByWeights,
+    } = randomRangeFactory(rand);
+
     const { gl } = sketchContext;
 
-    let mouseCords = [0, 0];
-    let isMouseInCanvas = false;
-
     const {
-      parallax,
       foreground,
       background,
       gridPartitioning,
       gridLinesToRects,
-      animation,
+      // animation,
     } = gene;
 
     const regl = createRegl({ gl });
@@ -190,7 +217,6 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
     const drawSimpleRects = (
       rects: Rect[],
       rectProps: any[],
-      globalProps: any,
     ) => {
       const triangles = rects.map(rectToTriangles);
 
@@ -239,10 +265,6 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
 
                         // uniforms
                         uniform vec2 resolution;
-                        uniform vec2 offset;
-                        uniform float zIndex;
-                        uniform float depthStrength;
-                        uniform float rotationStrength;
                         uniform bool isVert;
                         uniform vec2 topLeft;
                         uniform vec2 bottomRight;
@@ -257,11 +279,10 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
                             gradientMixRatio = isVert ? (position.y - topLeft[1]) / (bottomRight[1] - topLeft[1]) : (position.x - topLeft[0]) / (bottomRight[0] - topLeft[0]); 
                             vec3 xAxis = vec3(0.0, 1.0, 0.0);
                             vec3 yAxis = vec3(1.0, 0.0, 0.0);
-                            vec2 normalizedCords = vec2(2, 2) * ((position + (offset * depthStrength * zIndex)) / resolution);
+                            vec2 normalizedCords = vec2(2, 2) * ((position) / resolution);
                             normalizedCords *= vec2(1, -1);
                             normalizedCords += vec2(-1, 1);
-                            vec3 pos = rotate(rotate(vec3(normalizedCords, 0), xAxis, 1.0 * rotationStrength * offset[0]), yAxis, -1.0 * rotationStrength * offset[1]);
-                            gl_Position = vec4(pos.xy, 0, 1);
+                            gl_Position = vec4(normalizedCords, 0, 1);
                         }
                     `),
         primitive: 'triangles',
@@ -273,14 +294,10 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
           pointilism: regl.prop<CommandProps, 'pointilism'>('pointilism'),
           topLeft: (_, props: CommandProps) => props.rect[0],
           bottomRight: (_, props: CommandProps) => props.rect[1],
-          offset: globalProps.offset,
-          depthStrength: parallax.depthStrength,
-          rotationStrength: parallax.rotationStrength,
           fromColor: regl.prop<CommandProps, 'fromColor'>('fromColor'),
           toColor: regl.prop<CommandProps, 'toColor'>('toColor'),
           tintColor: regl.prop<CommandProps, 'tintColor'>('tintColor'),
           isVert: regl.prop<CommandProps, 'isVert'>('isVert'),
-          zIndex: regl.prop<CommandProps, 'zIndex'>('zIndex'),
         },
         count: 6,
       });
@@ -610,8 +627,7 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
       return l;
     };
 
-    const animate = () => {
-      const { offsetStrength } = parallax;
+    const draw = () => {
       const { gitter } = gridLinesToRects;
       const { gridSizeInUnits } = gridPartitioning;
       const lines = generateGridPartitioningInGridUnits(
@@ -659,23 +675,23 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
           );
         }
 
-        const startDelayInTicks = Math.floor(
-          animation.bloomMaxStartDelayInTicks *
-            (Math.abs(
-              simplex.noise2D(
-                colorPt[0] * colorPalleteIndex,
-                colorPt[1] * colorPalleteIndex,
-              ),
-            ) /
-              0.9),
-        );
+        // const startDelayInTicks = Math.floor(
+        //   animation.bloomMaxStartDelayInTicks *
+        //     (Math.abs(
+        //       simplex.noise2D(
+        //         colorPt[0] * colorPalleteIndex,
+        //         colorPt[1] * colorPalleteIndex,
+        //       ),
+        //     ) /
+        //       0.9),
+        // );
 
-        const breathDurationInTicks =
-          animation.breathDurationInTicksPerUnit *
-          ((isVert
-            ? lines[i][1][1] - lines[i][0][1]
-            : lines[i][1][0] - lines[i][0][0]) +
-            1);
+        // const breathDurationInTicks =
+        //   animation.breathDurationInTicksPerUnit *
+        //   ((isVert
+        //     ? lines[i][1][1] - lines[i][0][1]
+        //     : lines[i][1][0] - lines[i][0][0]) +
+        //     1);
 
         if (foreground.colorPalletes[colorPalleteIndex].type === 'simple') {
           const colorPallete = foreground.colorPalletes[
@@ -689,117 +705,90 @@ export const sketch = async (gene: Gene = DEFAULT_GENE) => {
             toColor: colorPallete.colors[colorIndex],
             tintColor: colorPallete.tintColors[colorIndex],
             isVert,
-            zIndex: i % 10, // TODO
-            startDelayInTicks,
-            breathDurationInTicks,
+            // zIndex: i % 10, // TODO
+            startDelayInTicks: 0,
+            breathDurationInTicks: 0,
           };
         }
 
-        if (foreground.colorPalletes[colorPalleteIndex].type === 'gradient') {
-          const colorPallete = foreground.colorPalletes[
-            colorPalleteIndex
-          ] as GradientColorPallete;
-          // assumes only two colors and 1 tint
-          return {
-            fromColor: colorPallete.colors[0],
-            toColor: colorPallete.colors[1],
-            tintColor: colorPallete.tintColors[0],
-            pointilism: colorPallete.pointilism,
-            isVert,
-            zIndex: (i % 10) + 1, // TODO
-            startDelayInTicks,
-            breathDurationInTicks,
-          };
-        }
+        // if (foreground.colorPalletes[colorPalleteIndex].type === 'gradient') {
+        //   const colorPallete = foreground.colorPalletes[
+        //     colorPalleteIndex
+        //   ] as GradientColorPallete;
+        //   // assumes only two colors and 1 tint
+        //   return {
+        //     fromColor: colorPallete.colors[0],
+        //     toColor: colorPallete.colors[1],
+        //     tintColor: colorPallete.tintColors[0],
+        //     pointilism: colorPallete.pointilism,
+        //     isVert,
+        //     zIndex: (i % 10) + 1, // TODO
+        //     startDelayInTicks,
+        //     breathDurationInTicks,
+        //   };
+        // }
 
         // invalid
         return {};
       });
 
-      const backgroundRects = convertGridLinesToRects(lines, lineProps);
-      const backgroundRectsProps = backgroundRects.map((r: any, i: number) => {
-        const isVert = lines[i][0][0] === lines[i][1][0];
-        return {
-          fromColor: darken(0.05, background.colors[0]),
-          toColor: darken(0.05, background.colors[1]),
-          tintColor: darken(0.0001, background.colors[0]),
-          pointilism: 0,
-          isVert,
-          zIndex: 0, // TODO
-          startDelayInTicks: 0,
-          breathDurationInTicks: 0,
-        };
-      });
-      const durationInTicks =
-        Math.max(...rectProps.map((r: any) => r.startDelayInTicks)) +
-        Math.max(...rectProps.map((r: any) => r.breathDurationInTicks));
+      // const backgroundRects = convertGridLinesToRects(lines, lineProps);
+      // const backgroundRectsProps = backgroundRects.map((r: any, i: number) => {
+      //   const isVert = lines[i][0][0] === lines[i][1][0];
+      //   return {
+      //     fromColor: darken(0.05, background.colors[0]),
+      //     toColor: darken(0.05, background.colors[1]),
+      //     tintColor: darken(0.0001, background.colors[0]),
+      //     pointilism: 0,
+      //     isVert,
+      //     zIndex: 0, // TODO
+      //     startDelayInTicks: 0,
+      //     breathDurationInTicks: 0,
+      //   };
+      // });
+      // const durationInTicks =
+      //   Math.max(...rectProps.map((r: any) => r.startDelayInTicks)) +
+      //   Math.max(...rectProps.map((r: any) => r.breathDurationInTicks));
 
-      const timelineAnimation: Animation = {
-        startDelayInTicks: animation.startDelayInTicks,
-        durationInTicks,
-        endDelayInTicks: animation.endDelayInTicks,
-        props: {},
-        type: 'timeline',
-        subAnimations: rectProps.map((r: any, i: number) => {
-          return {
-            startDelayInTicks: r.startDelayInTicks,
-            durationInTicks: r.breathDurationInTicks,
-            endDelayInTicks:
-              durationInTicks - r.breathDurationInTicks - r.startDelayInTicks,
-            props: { lineIndex: i },
-            type: 'breath',
-            subAnimations: [],
-          };
-        }),
-      };
+      // const timelineAnimation: Animation = {
+      //   startDelayInTicks: animation.startDelayInTicks,
+      //   durationInTicks,
+      //   endDelayInTicks: animation.endDelayInTicks,
+      //   props: {},
+      //   type: 'timeline',
+      //   subAnimations: rectProps.map((r: any, i: number) => {
+      //     return {
+      //       startDelayInTicks: r.startDelayInTicks,
+      //       durationInTicks: r.breathDurationInTicks,
+      //       endDelayInTicks:
+      //         durationInTicks - r.breathDurationInTicks - r.startDelayInTicks,
+      //       props: { lineIndex: i },
+      //       type: 'breath',
+      //       subAnimations: [],
+      //     };
+      //   }),
+      // };
 
-      let lastIsMouseInCanvasTick = 0;
-
-      regl.frame(({ tick }) => {
-        const animatedLines = getAnimatedLinesWithAnimations(
-          lines,
-          tick,
-          timelineAnimation,
-        );
-
-        const rects = convertGridLinesToRects(animatedLines, lineProps);
-        let offset = [
-          (mouseCords[0] - sketchContext.width / 2) * offsetStrength[0] * -1,
-          (mouseCords[1] - sketchContext.height / 2) * offsetStrength[1] * -1,
-        ];
-        if (!isMouseInCanvas) {
-          const offsetReturnCoeff =
-            1 -
-            Math.pow(
-              Math.min(
-                tick - lastIsMouseInCanvasTick,
-                parallax.animationTickCount,
-              ) / parallax.animationTickCount,
-              2,
-            );
-          offset = [
-            offset[0] * offsetReturnCoeff,
-            offset[1] * offsetReturnCoeff,
-          ];
-        } else {
-          lastIsMouseInCanvasTick = tick;
-        }
-        const globalProps = {
-          offset,
-        };
-
-        drawSimpleRects(rects, rectProps, globalProps);
-        drawSimpleRects(backgroundRects, backgroundRectsProps, {
-          offset: [0, 0],
-        });
-        drawBackground();
-      });
+      // regl.frame(({ tick }) => {
+      //   // const animatedLines = getAnimatedLinesWithAnimations(
+      //   //   lines,
+      //   //   tick,
+      //   //   timelineAnimation,
+      //   // );
+      //   const rects = convertGridLinesToRects(lines, lineProps);
+      //   drawSimpleRects(rects, rectProps);
+      //   // drawSimpleRects(backgroundRects, backgroundRectsProps);
+      //   drawBackground();
+      // });
+      const rects = convertGridLinesToRects(lines, lineProps);
+      drawSimpleRects(rects, rectProps);
+      drawBackground();
     };
 
     return {
       render: () => {
         start();
-        animate();
+        draw();
       },
       end: () => {
       },

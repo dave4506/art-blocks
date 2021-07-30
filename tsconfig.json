@@ -12,7 +12,6 @@
     "pretty": true,
     "skipLibCheck": true,
     "typeRoots": [
-      "node_modules/@0x/typescript-typings/types",
       "node_modules/@types"
     ],
     "strict": true,
@@ -22,6 +21,6 @@
     "declarationMap": true,
     "sourceMap": true,
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./src/data/colors.json"],
   "exclude": ["node_modules"],
 }
